@@ -1,6 +1,6 @@
 {
   "name": "orm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "ORM Firestore con Zod para frontend y backend",
   "type": "module",
   "main": "dist/index.js",
@@ -30,9 +30,10 @@
     "zod": "^3.23.8"
   },
   "peerDependencies": {
-    "firebase": "^10.0.0"
+    "firebase": "^12.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "firebase": "^12.11.0"
   }
 }

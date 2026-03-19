@@ -5,7 +5,7 @@ Libreria TypeScript para trabajar con Firebase en **frontend** y **backend** con
 - modelos Firestore validados con `zod`
 - snapshots tipados para Firestore y sesion
 - upload de imagenes a Storage con compresion opcional
-- auth frontend configurable (`email/password`, `google`)
+- auth frontend configurable (`email/password`, `google`, `customToken`)
 
 ## Instalacion
 
@@ -36,7 +36,8 @@ const orm = createFrontendOrm({
   },
   authProviders: {
     emailPassword: true,
-    google: true
+    google: true,
+    customToken: true
   }
 });
 
@@ -50,6 +51,7 @@ const users = orm.createCollection({
 });
 
 const authSnapshot = orm.authClient?.getSessionSnapshot();
+await orm.authClient?.signInWithCustomToken("CUSTOM_TOKEN");
 const userDoc = await users.getWithSnapshot("uid-1");
 
 if (orm.storageClient) {

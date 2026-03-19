@@ -2,6 +2,7 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  signInWithCustomToken as firebaseSignInWithCustomToken,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -13,6 +14,7 @@ import {
 export type FrontendAuthProviderFlags = {
   emailPassword?: boolean;
   google?: boolean;
+  customToken?: boolean;
 };
 
 export type FrontendSessionUser = {
@@ -60,7 +62,8 @@ export class FrontendAuthClient {
     this.auth = options.auth;
     this.providers = {
       emailPassword: options.providers?.emailPassword === true,
-      google: options.providers?.google === true
+      google: options.providers?.google === true,
+      customToken: options.providers?.customToken === true
     };
   }
 
@@ -70,6 +73,10 @@ export class FrontendAuthClient {
 
   public isGoogleEnabled(): boolean {
     return this.providers.google;
+  }
+
+  public isCustomTokenEnabled(): boolean {
+    return this.providers.customToken;
   }
 
   public getSessionSnapshot(): FrontendSessionSnapshot {
@@ -107,6 +114,15 @@ export class FrontendAuthClient {
     return signInWithPopup(this.auth, provider);
   }
 
+  public async signInWithCustomToken(customToken: string) {
+    this.assertProviderEnabled("customToken");
+    const token = customToken.trim();
+    if (!token) {
+      throw new Error("Custom token is required.");
+    }
+    return firebaseSignInWithCustomToken(this.auth, token);
+  }
+
   public async signOut() {
     return signOut(this.auth);
   }
@@ -118,6 +134,10 @@ export class FrontendAuthClient {
 
     if (provider === "google" && this.providers.google !== true) {
       throw new Error("Google auth is disabled in this FrontendAuthClient instance.");
+    }
+
+    if (provider === "customToken" && this.providers.customToken !== true) {
+      throw new Error("Custom token auth is disabled in this FrontendAuthClient instance.");
     }
   }
 }
