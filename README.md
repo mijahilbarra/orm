@@ -98,15 +98,7 @@ if (orm.storageClient) {
 }
 ```
 
-## API compat
-
-Se mantiene la ruta legacy:
-
-```ts
-import { FirestoreCollection } from "orm/firestore";
-```
-
-Y tambien se exponen subpaths:
+## Subpaths
 
 - `orm/frontend`
 - `orm/backend`

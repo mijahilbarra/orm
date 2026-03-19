@@ -18,10 +18,6 @@
       "types": "./dist/backend/index.d.ts",
       "default": "./dist/backend/index.js"
     },
-    "./firestore": {
-      "types": "./dist/firestore/index.d.ts",
-      "default": "./dist/firestore/index.js"
-    },
     "./package.json": "./package.json"
   },
   "files": [
