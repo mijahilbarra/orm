@@ -1,6 +1,6 @@
 {
   "name": "orm",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ORM Firestore con Zod para frontend y backend",
   "type": "module",
   "main": "dist/index.js",
@@ -24,7 +24,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "zod": "^3.23.8"
