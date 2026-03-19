@@ -1,6 +1,7 @@
 export { FirestoreCollection } from "./collection.js";
 export { FirestoreDictionary } from "./dictionary.js";
 export type {
+  CollectionQueryBuilder,
   CollectionSetOptions,
   FrontendCollectionDocumentSnapshot,
   FrontendCollectionQuerySnapshot

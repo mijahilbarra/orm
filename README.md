@@ -53,7 +53,8 @@ const authSnapshot = orm.authClient?.getSessionSnapshot();
 const userDoc = await users.getWithSnapshot("uid-1");
 
 if (orm.storageClient) {
-  await orm.storageClient.uploadImage(file, {
+  await orm.storageClient.uploadImage({
+    file,
     directory: "avatars",
     imageCompressionMb: 1
     // alias legacy soportado:

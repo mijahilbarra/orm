@@ -4,7 +4,9 @@ export type {
   BackendCollectionDocumentSnapshot,
   BackendCollectionQueryBuilder,
   BackendCollectionQuerySnapshot,
-  BackendCollectionSetOptions
+  BackendCollectionSetOptions,
+  CollectionQueryBuilder,
+  CollectionSetOptions
 } from "./collection.js";
 export type {
   BackendDictionarySetOptions,

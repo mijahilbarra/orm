@@ -8,6 +8,7 @@ import {
 import { resolveImageCompressionMb } from "../../core/firestore/utils.js";
 
 export type FrontendImageUploadOptions = {
+  file: File | Blob;
   directory: string;
   fileName?: string;
   metadata?: UploadMetadata;
@@ -166,7 +167,8 @@ export class FrontendStorageClient {
     this.storage = options.storage;
   }
 
-  public async uploadImage(file: File | Blob, options: FrontendImageUploadOptions): Promise<FrontendImageUploadResult> {
+  public async uploadImage(options: FrontendImageUploadOptions): Promise<FrontendImageUploadResult> {
+    const file = options.file;
     const compressionMb = resolveImageCompressionMb(options);
     const normalizedName = options.fileName && options.fileName.trim()
       ? options.fileName.trim()

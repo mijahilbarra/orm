@@ -2,6 +2,7 @@ import {
   addDoc,
   arrayRemove,
   arrayUnion,
+  type CollectionReference,
   collection,
   count,
   deleteDoc,
@@ -10,7 +11,6 @@ import {
   getDoc,
   getDocs,
   onSnapshot,
-  query,
   serverTimestamp,
   sum,
   average,
@@ -19,7 +19,6 @@ import {
   type DocumentSnapshot,
   type Firestore,
   type Query,
-  type QueryConstraint,
   type QuerySnapshot,
   type Unsubscribe
 } from "firebase/firestore";
@@ -45,6 +44,10 @@ export type FrontendCollectionQuerySnapshot<TSchema extends z.ZodTypeAny> = Snap
   WithId<z.output<TSchema>>[],
   QuerySnapshot
 >;
+
+export type CollectionQueryBuilder = (
+  ref: CollectionReference
+) => Query;
 
 export class FirestoreCollection<TSchema extends z.ZodTypeAny> {
   private readonly firestore;
@@ -78,6 +81,15 @@ export class FirestoreCollection<TSchema extends z.ZodTypeAny> {
     return this.schema.safeParse(data);
   }
 
+  private buildQuery(queryBuilder?: CollectionQueryBuilder): Query {
+    const base = this.collectionRef();
+    if (queryBuilder === undefined) {
+      return base;
+    }
+
+    return queryBuilder(base);
+  }
+
   public async get(id: string): Promise<WithId<z.output<TSchema>> | null> {
     const result = await this.getWithSnapshot(id);
     return result.data;
@@ -104,19 +116,15 @@ export class FirestoreCollection<TSchema extends z.ZodTypeAny> {
     };
   }
 
-  public async list(constraints: QueryConstraint[] = []): Promise<WithId<z.output<TSchema>>[]> {
-    const result = await this.listWithSnapshot(constraints);
+  public async list(queryBuilder?: CollectionQueryBuilder): Promise<WithId<z.output<TSchema>>[]> {
+    const result = await this.listWithSnapshot(queryBuilder);
     return result.data;
   }
 
   public async listWithSnapshot(
-    constraints: QueryConstraint[] = []
+    queryBuilder?: CollectionQueryBuilder
   ): Promise<FrontendCollectionQuerySnapshot<TSchema>> {
-    const baseQuery = constraints.length
-      ? query(this.collectionRef(), ...constraints)
-      : this.collectionRef();
-
-    const snapshot = await getDocs(baseQuery);
+    const snapshot = await getDocs(this.buildQuery(queryBuilder));
 
     return {
       data: snapshot.docs.map((entry) => ({
@@ -150,13 +158,11 @@ export class FirestoreCollection<TSchema extends z.ZodTypeAny> {
   }
 
   public watchList(
-    constraints: QueryConstraint[] = [],
     onChange: (value: FrontendCollectionQuerySnapshot<TSchema>) => void,
+    queryBuilder?: CollectionQueryBuilder,
     onError?: (error: Error) => void
   ): Unsubscribe {
-    const baseQuery: Query = constraints.length
-      ? query(this.collectionRef(), ...constraints)
-      : this.collectionRef();
+    const baseQuery = this.buildQuery(queryBuilder);
 
     return onSnapshot(baseQuery, (snapshot) => {
       onChange({
@@ -231,12 +237,9 @@ export class FirestoreCollection<TSchema extends z.ZodTypeAny> {
 
   public async sum(
     field: string,
-    constraints: QueryConstraint[] = []
+    queryBuilder?: CollectionQueryBuilder
   ) {
-    const baseQuery = constraints.length
-      ? query(this.collectionRef(), ...constraints)
-      : this.collectionRef();
-    const snapshot = await getAggregateFromServer(baseQuery, {
+    const snapshot = await getAggregateFromServer(this.buildQuery(queryBuilder), {
       total: sum(field)
     });
     return snapshot.data().total;
@@ -244,24 +247,18 @@ export class FirestoreCollection<TSchema extends z.ZodTypeAny> {
 
   public async average(
     field: string,
-    constraints: QueryConstraint[] = []
+    queryBuilder?: CollectionQueryBuilder
   ) {
-    const baseQuery = constraints.length
-      ? query(this.collectionRef(), ...constraints)
-      : this.collectionRef();
-    const snapshot = await getAggregateFromServer(baseQuery, {
+    const snapshot = await getAggregateFromServer(this.buildQuery(queryBuilder), {
       total: average(field)
     });
     return snapshot.data().total;
   }
 
   public async count(
-    constraints: QueryConstraint[] = []
+    queryBuilder?: CollectionQueryBuilder
   ) {
-    const baseQuery = constraints.length
-      ? query(this.collectionRef(), ...constraints)
-      : this.collectionRef();
-    const snapshot = await getAggregateFromServer(baseQuery, {
+    const snapshot = await getAggregateFromServer(this.buildQuery(queryBuilder), {
       total: count()
     });
     return snapshot.data().total;

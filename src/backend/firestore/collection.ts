@@ -16,14 +16,18 @@ import type {
 } from "../../core/firestore/types.js";
 import { buildTimestampPayload } from "../../core/firestore/utils.js";
 
-export type BackendCollectionQueryBuilder = (
+export type CollectionQueryBuilder = (
   ref: CollectionReference
 ) => Query;
 
-export type BackendCollectionSetOptions = {
+export type BackendCollectionQueryBuilder = CollectionQueryBuilder;
+
+export type CollectionSetOptions = {
   merge?: boolean;
   timestampMode?: "create" | "update" | "none";
 };
+
+export type BackendCollectionSetOptions = CollectionSetOptions;
 
 export type BackendCollectionDocumentSnapshot<TSchema extends z.ZodTypeAny> = SnapshotPayload<
   WithId<z.output<TSchema>> | null,
@@ -67,7 +71,7 @@ export class BackendFirestoreCollection<TSchema extends z.ZodTypeAny> {
     return this.schema.safeParse(data);
   }
 
-  private buildQuery(queryBuilder?: BackendCollectionQueryBuilder): Query {
+  private buildQuery(queryBuilder?: CollectionQueryBuilder): Query {
     const base = this.collectionRef();
     if (queryBuilder === undefined) {
       return base;
@@ -102,13 +106,13 @@ export class BackendFirestoreCollection<TSchema extends z.ZodTypeAny> {
     };
   }
 
-  public async list(queryBuilder?: BackendCollectionQueryBuilder): Promise<WithId<z.output<TSchema>>[]> {
+  public async list(queryBuilder?: CollectionQueryBuilder): Promise<WithId<z.output<TSchema>>[]> {
     const result = await this.listWithSnapshot(queryBuilder);
     return result.data;
   }
 
   public async listWithSnapshot(
-    queryBuilder?: BackendCollectionQueryBuilder
+    queryBuilder?: CollectionQueryBuilder
   ): Promise<BackendCollectionQuerySnapshot<TSchema>> {
     const snapshot = await this.buildQuery(queryBuilder).get();
 
@@ -145,7 +149,7 @@ export class BackendFirestoreCollection<TSchema extends z.ZodTypeAny> {
 
   public watchList(
     onChange: (value: BackendCollectionQuerySnapshot<TSchema>) => void,
-    queryBuilder?: BackendCollectionQueryBuilder,
+    queryBuilder?: CollectionQueryBuilder,
     onError?: (error: Error) => void
   ): Unsubscribe {
     const query = this.buildQuery(queryBuilder);
@@ -175,7 +179,7 @@ export class BackendFirestoreCollection<TSchema extends z.ZodTypeAny> {
   public async set(
     id: string,
     data: z.input<TSchema>,
-    options: BackendCollectionSetOptions = {}
+    options: CollectionSetOptions = {}
   ): Promise<void> {
     const parsed = this.schema.parse(data);
     const timestampMode = options.timestampMode ?? "create";
@@ -218,12 +222,12 @@ export class BackendFirestoreCollection<TSchema extends z.ZodTypeAny> {
     });
   }
 
-  public async count(queryBuilder?: BackendCollectionQueryBuilder) {
+  public async count(queryBuilder?: CollectionQueryBuilder) {
     const snapshot = await this.buildQuery(queryBuilder).count().get();
     return snapshot.data().count;
   }
 
-  public async sum(field: string, queryBuilder?: BackendCollectionQueryBuilder) {
+  public async sum(field: string, queryBuilder?: CollectionQueryBuilder) {
     const snapshot = await this.buildQuery(queryBuilder)
       .aggregate({ total: AggregateField.sum(field) })
       .get();
@@ -231,7 +235,7 @@ export class BackendFirestoreCollection<TSchema extends z.ZodTypeAny> {
     return snapshot.data().total;
   }
 
-  public async average(field: string, queryBuilder?: BackendCollectionQueryBuilder) {
+  public async average(field: string, queryBuilder?: CollectionQueryBuilder) {
     const snapshot = await this.buildQuery(queryBuilder)
       .aggregate({ total: AggregateField.average(field) })
       .get();
