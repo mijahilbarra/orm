@@ -139,4 +139,26 @@ export class BackendFirestoreDictionary<TSchema extends z.ZodType<Record<string,
       ...buildTimestampPayload(this.timestamps, "update", () => FieldValue.serverTimestamp())
     });
   }
+
+  public async arrayUnion(key: string, ...values: unknown[]): Promise<void> {
+    const path = this.rootKey && this.rootKey.trim()
+      ? `${this.rootKey}.${key}`
+      : key;
+
+    await this.docRef().update({
+      [path]: FieldValue.arrayUnion(...values),
+      ...buildTimestampPayload(this.timestamps, "update", () => FieldValue.serverTimestamp())
+    });
+  }
+
+  public async arrayRemove(key: string, ...values: unknown[]): Promise<void> {
+    const path = this.rootKey && this.rootKey.trim()
+      ? `${this.rootKey}.${key}`
+      : key;
+
+    await this.docRef().update({
+      [path]: FieldValue.arrayRemove(...values),
+      ...buildTimestampPayload(this.timestamps, "update", () => FieldValue.serverTimestamp())
+    });
+  }
 }

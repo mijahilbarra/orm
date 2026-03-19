@@ -1,4 +1,6 @@
 import {
+  arrayRemove as firestoreArrayRemove,
+  arrayUnion as firestoreArrayUnion,
   deleteField,
   doc,
   getDoc,
@@ -141,6 +143,28 @@ export class FirestoreDictionary<TSchema extends z.ZodType<Record<string, unknow
 
     await updateDoc(this.docRef(), {
       [key]: deleteField(),
+      ...buildTimestampPayload(this.timestamps, "update", () => serverTimestamp())
+    });
+  }
+
+  public async arrayUnion(key: string, ...values: unknown[]): Promise<void> {
+    const path = this.rootKey && this.rootKey.trim()
+      ? `${this.rootKey}.${key}`
+      : key;
+
+    await updateDoc(this.docRef(), {
+      [path]: firestoreArrayUnion(...values),
+      ...buildTimestampPayload(this.timestamps, "update", () => serverTimestamp())
+    });
+  }
+
+  public async arrayRemove(key: string, ...values: unknown[]): Promise<void> {
+    const path = this.rootKey && this.rootKey.trim()
+      ? `${this.rootKey}.${key}`
+      : key;
+
+    await updateDoc(this.docRef(), {
+      [path]: firestoreArrayRemove(...values),
       ...buildTimestampPayload(this.timestamps, "update", () => serverTimestamp())
     });
   }
